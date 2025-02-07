@@ -1,2 +1,2 @@
 # Rwanda
-JSON File containing Rwanda Locations from provinces to villages (Imidugudu)
+This is JSON File containing Rwanda Locations from provinces to villages (Imidugudu)
