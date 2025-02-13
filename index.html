@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background: #f9f9f9;
+        }
+
+        select:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #007BFF;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 100%;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Select Your Location</h2>
+
+        <label for="province">Province:</label>
+        <select id="province" onchange="populateDistricts()">
+            <option value="">Select Province</option>
+        </select>
+
+        <label for="district">District:</label>
+        <select id="district" onchange="populateSectors()" disabled>
+            <option value="">Select District</option>
+        </select>
+
+        <label for="sector">Sector:</label>
+        <select id="sector" onchange="populateCells()" disabled>
+            <option value="">Select Sector</option>
+        </select>
+
+        <label for="cell">Cell:</label>
+        <select id="cell" onchange="populateVillages()" disabled>
+            <option value="">Select Cell</option>
+        </select>
+
+        <label for="village">Village:</label>
+        <select id="village" disabled>
+            <option value="">Select Village</option>
+        </select>
+    </div>
+
+    <script>
+        let data;
+
+        fetch('data.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                data = jsonData;
+                populateProvinces();
+            });
+
+        function populateProvinces() {
+            const provinceSelect = document.getElementById("province");
+            for (const province in data) {
+                let option = document.createElement("option");
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
+            }
+        }
+
+        function resetAndDisable(selectId) {
+            const selectElement = document.getElementById(selectId);
+            selectElement.innerHTML = '<option value="">Select ' + selectId.charAt(0).toUpperCase() + selectId.slice(1) + '</option>';
+            selectElement.disabled = true;
+        }
+
+        function populateDistricts() {
+            resetAndDisable("district");
+            resetAndDisable("sector");
+            resetAndDisable("cell");
+            resetAndDisable("village");
+
+            const province = document.getElementById("province").value;
+            const districtSelect = document.getElementById("district");
+
+            if (province && data[province]) {
+                districtSelect.disabled = false;
+                for (const district in data[province]) {
+                    let option = document.createElement("option");
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                }
+            }
+        }
+
+        function populateSectors() {
+            resetAndDisable("sector");
+            resetAndDisable("cell");
+            resetAndDisable("village");
+
+            const province = document.getElementById("province").value;
+            const district = document.getElementById("district").value;
+            const sectorSelect = document.getElementById("sector");
+
+            if (province && district && data[province][district]) {
+                sectorSelect.disabled = false;
+                for (const sector in data[province][district]) {
+                    let option = document.createElement("option");
+                    option.value = sector;
+                    option.textContent = sector;
+                    sectorSelect.appendChild(option);
+                }
+            }
+        }
+
+        function populateCells() {
+            resetAndDisable("cell");
+            resetAndDisable("village");
+
+            const province = document.getElementById("province").value;
+            const district = document.getElementById("district").value;
+            const sector = document.getElementById("sector").value;
+            const cellSelect = document.getElementById("cell");
+
+            if (province && district && sector && data[province][district][sector]) {
+                cellSelect.disabled = false;
+                for (const cell in data[province][district][sector]) {
+                    let option = document.createElement("option");
+                    option.value = cell;
+                    option.textContent = cell;
+                    cellSelect.appendChild(option);
+                }
+            }
+        }
+
+        function populateVillages() {
+            resetAndDisable("village");
+
+            const province = document.getElementById("province").value;
+            const district = document.getElementById("district").value;
+            const sector = document.getElementById("sector").value;
+            const cell = document.getElementById("cell").value;
+            const villageSelect = document.getElementById("village");
+
+            if (province && district && sector && cell && data[province][district][sector][cell]) {
+                villageSelect.disabled = false;
+                data[province][district][sector][cell].forEach(village => {
+                    let option = document.createElement("option");
+                    option.value = village;
+                    option.textContent = village;
+                    villageSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
